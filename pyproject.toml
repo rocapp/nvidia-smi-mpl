@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "nvidia-smi-mpl"
+version = "0.1.0"
+description = "realtime plot of nvidia gpu metrics using matplotlib"
+authors = ["Robbie Capps <rocapp@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.11,<4"
+matplotlib = "^3.8.2"
+click = "^8.1.7"
+
+[tool.poetry.group.dev.dependencies]
+ipython = "^8.20.0"
+
+
+[tool.poetry.group.development.dependencies]
+pep8 = "^1.7.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
