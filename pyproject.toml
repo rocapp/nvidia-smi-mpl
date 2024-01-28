@@ -5,17 +5,19 @@ description = "realtime plot of nvidia gpu metrics using matplotlib"
 authors = ["Robbie Capps <rocapp@gmail.com>"]
 readme = "README.md"
 
+[tool.poetry.scripts]
+nvidia-smi-mpl = 'nvidia_smi_mpl.main:main'
+
 [tool.poetry.dependencies]
 python = ">=3.11,<4"
-matplotlib = "^3.8.2"
+matplotlib = "^3.7.1"
 click = "^8.1.7"
+pycodestyle = "^2.11.1"
+pygobject = "^3.46.0"
+pandas = "^2.2.0"
 
 [tool.poetry.group.dev.dependencies]
 ipython = "^8.20.0"
-
-
-[tool.poetry.group.development.dependencies]
-pep8 = "^1.7.1"
 
 [build-system]
 requires = ["poetry-core"]

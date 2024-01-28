@@ -1,0 +1,73 @@
+Warning: 'nvidia-smi-mpl' is an entry point defined in pyproject.toml, but it's not installed as a script. You may get improper `sys.argv[0]`.
+
+The support to run uninstalled scripts will be removed in a future release.
+
+Run `poetry install` to resolve and get rid of this message.
+
+libEGL warning: egl: failed to create dri2 screen
+libEGL warning: failed to get driver name for fd -1
+
+libEGL warning: MESA-LOADER: failed to retrieve device information
+
+libEGL warning: failed to get driver name for fd -1
+
+glx: failed to create dri3 screen
+failed to load driver: nouveau
+/home/robertc/Git/nvidia-smi-mpl/nvidia_smi_mpl/main.py:65: UserWarning: frames=None which we can infer the length of, did not pass an explicit *save_count* and passed cache_frame_data=True.  To avoid a possibly unbounded cache, frame data caching has been disabled. To suppress this warning either pass `cache_frame_data=False` or `save_count=MAX_FRAMES`.
+  ani = animation.FuncAnimation(fig, update, interval=interval*1000)
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/home/robertc/.venvs/py311/lib/python3.11/site-packages/click/core.py", line 1157, in __call__
+    return self.main(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/robertc/.venvs/py311/lib/python3.11/site-packages/click/core.py", line 1078, in main
+    rv = self.invoke(ctx)
+         ^^^^^^^^^^^^^^^^
+  File "/home/robertc/.venvs/py311/lib/python3.11/site-packages/click/core.py", line 1434, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/robertc/.venvs/py311/lib/python3.11/site-packages/click/core.py", line 783, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/robertc/Git/nvidia-smi-mpl/nvidia_smi_mpl/main.py", line 66, in main
+    plt.show()
+  File "/home/robertc/.venvs/py311/lib/python3.11/site-packages/matplotlib/pyplot.py", line 527, in show
+    return _get_backend_mod().show(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/robertc/.venvs/py311/lib/python3.11/site-packages/matplotlib/backend_bases.py", line 3435, in show
+    manager.show()  # Emits a warning for non-interactive backend.
+    ^^^^^^^^^^^^^^
+  File "/home/robertc/.venvs/py311/lib/python3.11/site-packages/matplotlib/backends/_backend_gtk.py", line 222, in show
+    self.canvas.draw()
+  File "/home/robertc/.venvs/py311/lib/python3.11/site-packages/matplotlib/backends/backend_agg.py", line 388, in draw
+    self.figure.draw(self.renderer)
+  File "/home/robertc/.venvs/py311/lib/python3.11/site-packages/matplotlib/artist.py", line 95, in draw_wrapper
+    result = draw(artist, renderer, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/robertc/.venvs/py311/lib/python3.11/site-packages/matplotlib/artist.py", line 72, in draw_wrapper
+    return draw(artist, renderer)
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/robertc/.venvs/py311/lib/python3.11/site-packages/matplotlib/figure.py", line 3164, in draw
+    DrawEvent("draw_event", self.canvas, renderer)._process()
+  File "/home/robertc/.venvs/py311/lib/python3.11/site-packages/matplotlib/backend_bases.py", line 1271, in _process
+    self.canvas.callbacks.process(self.name, self)
+  File "/home/robertc/.venvs/py311/lib/python3.11/site-packages/matplotlib/cbook.py", line 303, in process
+    self.exception_handler(exc)
+  File "/home/robertc/.venvs/py311/lib/python3.11/site-packages/matplotlib/cbook.py", line 87, in _exception_printer
+    raise exc
+  File "/home/robertc/.venvs/py311/lib/python3.11/site-packages/matplotlib/cbook.py", line 298, in process
+    func(*args, **kwargs)
+  File "/home/robertc/.venvs/py311/lib/python3.11/site-packages/matplotlib/animation.py", line 912, in _start
+    self._init_draw()
+  File "/home/robertc/.venvs/py311/lib/python3.11/site-packages/matplotlib/animation.py", line 1749, in _init_draw
+    self._draw_frame(frame_data)
+  File "/home/robertc/.venvs/py311/lib/python3.11/site-packages/matplotlib/animation.py", line 1768, in _draw_frame
+    self._drawn_artists = self._func(framedata, *self._args)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/robertc/Git/nvidia-smi-mpl/nvidia_smi_mpl/main.py", line 56, in update
+    data = parse_nvidia_smi_output(output)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/robertc/Git/nvidia-smi-mpl/nvidia_smi_mpl/main.py", line 19, in parse_nvidia_smi_output
+    'temp': int(temp_perf[0][:-1]),  # Remove 'C' and convert to int
+            ^^^^^^^^^^^^^^^^^^^^^^
+ValueError: invalid literal for int() with base 10: 'N/'
