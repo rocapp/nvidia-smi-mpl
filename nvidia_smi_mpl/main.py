@@ -113,7 +113,9 @@ events = []  # List of events
 @click.command()
 @click.option('--interval', default=1, help='Update interval in seconds.')
 @click.option('--log-level', default='INFO', help='Set the logging level (e.g., DEBUG, INFO, WARNING, ERROR, CRITICAL)')
-def main(interval, log_level):
+@click.option('--export-video', is_flag=True, help='Export the plot as a video (MP4).')
+@click.option('--export-frames', type=click.Path(), help='Export individual frames as PNG files to the specified path.')
+def main(interval, log_level, export_video, export_frames):
     """Real-time NVIDIA GPU metrics visualizer."""
     # Configure logging
     logging.basicConfig(level=getattr(logging, log_level.upper()),
@@ -130,6 +132,13 @@ def main(interval, log_level):
     def on_click(event):
         events.append(metrics.tstamp[-1])
         logging.info('Added vertical line at %s', metrics.tstamp[-1])
+
+    # Function to save frames
+    def save_frames(fig, frame_dir, frame_num):
+        if not os.path.exists(frame_dir):
+            os.makedirs(frame_dir)
+        frame_path = os.path.join(frame_dir, f'frame{frame_num:04d}.png')
+        fig.savefig(frame_path)
 
     # Add a button for adding vertical lines
     ax_button = plt.axes([0.81, 0.05, 0.1, 0.075])  # Adjust the position as needed
@@ -150,9 +159,17 @@ def main(interval, log_level):
         if len(events) > 0:
             add_vertical_line(fig, axs, events)
             fig.canvas.draw()
+        if export_frames:
+            save_frames(fig, export_frames, frame)
 
     ani = animation.FuncAnimation(fig, update, interval=interval*1000)
+
+    if export_video:
+        writer = animation.FFMpegWriter(fps=1/interval, metadata=dict(artist='Robbie Capps + You!'), bitrate=1800)
+        ani.save('gpu_metrics.mp4', writer=writer)
+    
     logging.info('Application started. Updating every %s seconds', interval)
+
     plt.show()
 
 
