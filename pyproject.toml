@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nvidia-smi-mpl"
-version = "0.1.0"
+version = "0.3.0"
 description = "realtime plot of nvidia gpu metrics using matplotlib"
 authors = ["Robbie Capps <rocapp@gmail.com>"]
 readme = "README.md"

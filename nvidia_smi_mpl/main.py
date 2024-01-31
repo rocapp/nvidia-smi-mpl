@@ -1,3 +1,4 @@
+import os
 import traceback
 import logging
 from datetime import datetime
@@ -10,7 +11,9 @@ import re
 import matplotlib as mpl
 import pandas as pd
 from dataclasses import dataclass, asdict
-mpl.use('GTK4Agg')
+from threading import Thread
+
+mpl.use('GTK3Agg')  # Use GTK3 backend
 plt.close('all')
 
 
@@ -113,8 +116,8 @@ events = []  # List of events
 @click.command()
 @click.option('--interval', default=1, help='Update interval in seconds.')
 @click.option('--log-level', default='INFO', help='Set the logging level (e.g., DEBUG, INFO, WARNING, ERROR, CRITICAL)')
-@click.option('--export-video', is_flag=True, help='Export the plot as a video (MP4).')
-@click.option('--export-frames', type=click.Path(), help='Export individual frames as PNG files to the specified path.')
+@click.option('--export-video', type=click.Path(), default=None, help='Export the plot as a video (MP4) to the specified path.')
+@click.option('--export-frames', type=click.Path(), default=None, help='Export individual frames as PNG files to the specified path.')
 def main(interval, log_level, export_video, export_frames):
     """Real-time NVIDIA GPU metrics visualizer."""
     # Configure logging
@@ -139,6 +142,11 @@ def main(interval, log_level, export_video, export_frames):
             os.makedirs(frame_dir)
         frame_path = os.path.join(frame_dir, f'frame{frame_num:04d}.png')
         fig.savefig(frame_path)
+    
+    def export_video_func(ani, export_video):
+        writer = animation.FFMpegWriter(fps=5, extra_args=['-vcodec', 'libx264'], metadata=dict(artist='Robbie Capps + You!'), bitrate=-1)
+        logging.info('Exporting video to %s', export_video)
+        ani.save(export_video, writer=writer)
 
     # Add a button for adding vertical lines
     ax_button = plt.axes([0.81, 0.05, 0.1, 0.075])  # Adjust the position as needed
@@ -165,8 +173,10 @@ def main(interval, log_level, export_video, export_frames):
     ani = animation.FuncAnimation(fig, update, interval=interval*1000)
 
     if export_video:
-        writer = animation.FFMpegWriter(fps=1/interval, metadata=dict(artist='Robbie Capps + You!'), bitrate=1800)
-        ani.save('gpu_metrics.mp4', writer=writer)
+        if '.mp4' not in export_video:
+            export_video += '.mp4'
+        # Start a thread to export the video
+        Thread(target=export_video_func, args=(ani, export_video)).start()
     
     logging.info('Application started. Updating every %s seconds', interval)
 
