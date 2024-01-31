@@ -170,7 +170,7 @@ def main(interval, log_level, export_video, export_frames):
         if export_frames:
             save_frames(fig, export_frames, frame)
 
-    ani = animation.FuncAnimation(fig, update, interval=interval*1000)
+    ani = animation.FuncAnimation(fig, update, interval=interval*1000, save_count=1000)
 
     if export_video:
         if '.mp4' not in export_video:
