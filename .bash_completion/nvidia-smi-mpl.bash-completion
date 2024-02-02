@@ -6,7 +6,7 @@ _nvidia_smi_mpl_completion()
     COMPREPLY=()
     cur="${COMP_WORDS[COMP_CWORD]}"
     prev="${COMP_WORDS[COMP_CWORD-1]}"
-    opts="--interval --log-level --export-video --export-frames --help"
+    opts="--interval --log-level --export-video --export-frames --api --help"
 
     if [[ ${cur} == -* ]] ; then
         COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )

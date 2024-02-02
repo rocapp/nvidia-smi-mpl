@@ -61,6 +61,18 @@ def get_mem_unit(mem):
 
 
 def parse_nvidia_smi_output(output):
+    """
+    Parse the output of nvidia-smi command to extract GPU information.
+
+    Args:
+    - output: str, the output of the nvidia-smi command
+
+    Returns:
+    - GPU object: contains information about the GPU such as name, temperature, power usage, memory usage, GPU utilization, and timestamp
+
+    Raises:
+    - ValueError: if the nvidia-smi output cannot be parsed
+    """
     # Remove unwanted characters
     output = re.sub(r'\+--*', '', output)
     output = re.sub(r'\|', '', output)
@@ -85,9 +97,18 @@ def parse_nvidia_smi_output(output):
     raise ValueError('Could not parse nvidia-smi output')
 
 
+def get_nvidia_smi_data():
+    """
+    Retrieves and returns data from the nvidia-smi command.
+    """
+    output = subprocess.check_output(['nvidia-smi'], text=True)
+    data = parse_nvidia_smi_output(output)
+    return data
+
+
 def update_plots(axs, df):
     n = 15
-    dTdt = 10 * (df['gpu_temp'].diff().tail(n).max() + df['gpu_temp'].diff().tail(n).min())
+    dTdt = (df['gpu_temp'].diff().tail(n).max() + df['gpu_temp'].diff().tail(n).min())
     axs[0].cla()
     axs[0].plot(df['gpu_temp'], label='Temperature (C)')
     axs[0].legend(loc='upper left')
@@ -118,15 +139,24 @@ events = []  # List of events
 @click.option('--log-level', default='INFO', help='Set the logging level (e.g., DEBUG, INFO, WARNING, ERROR, CRITICAL)')
 @click.option('--export-video', type=click.Path(), default=None, help='Export the plot as a video (MP4) to the specified path.')
 @click.option('--export-frames', type=click.Path(), default=None, help='Export individual frames as PNG files to the specified path.')
-def main(interval, log_level, export_video, export_frames):
+@click.option('--api', default=False, is_flag=True, help='Start the API server.')
+@click.option('--address', default='127.0.0.1', help='The address to bind the API server to.')
+@click.option('--port', default=9000, help='The port to bind the API server to.')
+@click.option('--hide-plot', default=False, is_flag=True, help='Hide the plot window.')
+def main(interval, log_level, export_video, export_frames, api, address, port, hide_plot):
     """Real-time NVIDIA GPU metrics visualizer."""
     # Configure logging
     logging.basicConfig(level=getattr(logging, log_level.upper()),
                         format='%(asctime)s - %(levelname)s - %(message)s')
     logging.info('Starting NVIDIA GPU metrics visualizer')
 
-    fig, axs = plt.subplots(4, 1)
-    plt.subplots_adjust(hspace=1)
+    # Initialize the API server
+    if api:
+        from nvidia_smi_mpl.server import setup_server
+        Thread(target=setup_server, args=(address, port)).start()
+
+    fig, axs = plt.subplots(nrows=4, ncols=1, sharex='all', figsize=(10, 8))
+    plt.subplots_adjust(hspace=0.5)
 
     # Initialize metrics
     metrics = MetricsList([], [], [], [], [])
@@ -136,6 +166,9 @@ def main(interval, log_level, export_video, export_frames):
         events.append(metrics.tstamp[-1])
         logging.info('Added vertical line at %s', metrics.tstamp[-1])
 
+    # get current date
+    today = datetime.now().strftime('%Y-%m-%d')
+
     # Function to save frames
     def save_frames(fig, frame_dir, frame_num):
         if not os.path.exists(frame_dir):
@@ -144,7 +177,7 @@ def main(interval, log_level, export_video, export_frames):
         fig.savefig(frame_path)
     
     def export_video_func(ani, export_video):
-        writer = animation.FFMpegWriter(fps=5, extra_args=['-vcodec', 'libx264'], metadata=dict(artist='Robbie Capps + You!'), bitrate=-1)
+        writer = animation.FFMpegWriter(fps=12, metadata=dict(artist='Robbie Capps + You!'), bitrate=1600)
         logging.info('Exporting video to %s', export_video)
         ani.save(export_video, writer=writer)
 
@@ -154,8 +187,7 @@ def main(interval, log_level, export_video, export_frames):
     btn.on_clicked(on_click)
 
     def update(frame):
-        output = subprocess.check_output(['nvidia-smi'], text=True)
-        data = parse_nvidia_smi_output(output)
+        data = get_nvidia_smi_data()
         metrics.gpu_temp.append(data.temp.value)
         metrics.gpu_power.append(data.power.value)
         metrics.gpu_memory.append(data.memory.value)
@@ -168,7 +200,10 @@ def main(interval, log_level, export_video, export_frames):
             add_vertical_line(fig, axs, events)
             fig.canvas.draw()
         if export_frames:
-            save_frames(fig, export_frames, frame)
+            frame_dir = str(export_frames)
+            if today not in frame_dir:
+                frame_dir = os.path.join(frame_dir, today)
+            save_frames(fig, frame_dir, frame)
 
     ani = animation.FuncAnimation(fig, update, interval=interval*1000, save_count=1000)
 
@@ -176,11 +211,16 @@ def main(interval, log_level, export_video, export_frames):
         if '.mp4' not in export_video:
             export_video += '.mp4'
         # Start a thread to export the video
-        Thread(target=export_video_func, args=(ani, export_video)).start()
+        # Thread(target=export_video_func, args=(ani, export_video)).start()
+        export_video_func(ani, export_video)
     
     logging.info('Application started. Updating every %s seconds', interval)
-
-    plt.show()
+    if not hide_plot:
+        logging.info('Plot window visible. Press Ctrl+C to exit')
+        plt.show()
+    else:
+        logging.info('Plot window hidden. Press Ctrl+C to exit')
+        plt.gcf().set_visible(False)
 
 
 if __name__ == '__main__':
